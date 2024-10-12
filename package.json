@@ -3,10 +3,9 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-  "start": "nodemon backend/server.js",
-  "build": "cd frontend && npm install && npm run build"
-}
-,
+    "start": "nodemon backend/server.js",
+    "build": "cd frontend && npm install && npm run build"
+  },
   "author": "piyush agarwal",
   "license": "ISC",
   "description": "",
