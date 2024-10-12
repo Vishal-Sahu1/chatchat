@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "start": "nodemon backend/server.js",
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js",
     "build": "cd frontend && npm install && npm run build"
   },
   "author": "piyush agarwal",
@@ -12,14 +13,16 @@
   "dependencies": {
     "axios": "^1.7.7",
     "bcryptjs": "^2.4.3",
+    "concurrently": "^8.0.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "express-async-handler": "^1.2.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.7.0",
-    "nodemon": "^3.1.7",
-    "socket.io": "^4.8.0",
-    "concurrently": "^8.0.1"
+    "socket.io": "^4.8.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
   }
 }
