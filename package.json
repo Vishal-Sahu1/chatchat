@@ -3,13 +3,10 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "start": "node backend/server.js",
-    "server": "nodemon backend/server.js",
-    "client-install": "npm install --prefix frontend",
-    "build": "npm run client-install && npm run build --prefix frontend",
-    "start-all": "concurrently \"npm run server\" \"npm run build --prefix frontend\"",
-    "dev": "concurrently \"npm run server\" \"npm start --prefix frontend\""
-  },
+  "start": "nodemon backend/server.js",
+  "build": "cd frontend && npm install && npm run build"
+}
+,
   "author": "piyush agarwal",
   "license": "ISC",
   "description": "",
