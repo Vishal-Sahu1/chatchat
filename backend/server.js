@@ -2,15 +2,18 @@ const express = require("express");
 const dotenv = require("dotenv");
 const http = require("http");
 const socketIo = require("socket.io");
+const path = require("path");
 const { chats } = require("./data/data");
 const connectDB = require("./config/db");
 const userRoutes = require("./routes/userRoutes");
+const cors = require("cors");
 
 dotenv.config();
 connectDB();
 
 const app = express();
 app.use(express.json());
+app.use(cors()); // CORS middleware to allow requests from different origins
 
 const server = http.createServer(app);
 const io = socketIo(server, {
@@ -69,9 +72,21 @@ io.on("connection", (socket) => {
 
 // User routes and root
 app.use("/api/user", userRoutes);
-app.get("/", (req, res) => {
-  res.send("API is Running");
-});
+
+// Deployment configuration to serve frontend from backend
+const __dirname1 = path.resolve();
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname1, "/frontend/build")));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname1, "frontend", "build", "index.html"));
+  });
+}
+ else {
+  app.get("/", (req, res) => {
+    res.send("API is Running");
+  });
+}
 
 // Start server
 const PORT = process.env.PORT || 5000;
