@@ -16,7 +16,9 @@ const Chat = ({ match }) => {
       socket = io("http://localhost:5000");
     }
 
-    socket.emit("joinRoom", { roomName });
+    const username = new URLSearchParams(window.location.search).get("username");
+
+    socket.emit("joinRoom", { roomName, username });
 
     // Listen for incoming messages
     const handleMessage = (newMessage) => {
@@ -40,14 +42,8 @@ const Chat = ({ match }) => {
 
   const sendMessage = () => {
     if (message.trim()) {
-      const newMessage = {
-        username: "You",
-        text: message,
-        color: "#0000FF"
-      };
-      setMessages((prevMessages) => [...prevMessages, newMessage]); // Add message locally
-      socket.emit("sendMessage", { roomName, message }); // Send message to other clients
-      setMessage("");
+      socket.emit("sendMessage", { roomName, message: message.trim() });
+      setMessage(""); // Clear the input after sending the message
     }
   };
 
@@ -55,8 +51,8 @@ const Chat = ({ match }) => {
     <Box
       display="flex"
       justifyContent="center"
-      alignItems="center" 
-      minHeight="100vh" 
+      alignItems="center"
+      minHeight="100vh"
       backgroundImage="url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6eXWZ3rAjpb43fiGhevnJIFGoNfQoUYemQw&s')"
       backgroundSize="cover"
       backgroundPosition="center"
@@ -76,22 +72,26 @@ const Chat = ({ match }) => {
           boxShadow="md"
         >
           {messages.map((msg, index) => (
-            <Flex 
+            <Flex
               key={index}
-              justifyContent={msg.username === "You" ? "flex-end" : "flex-start"}
+              justifyContent="center" // Align message container to the center
               mb={2}
             >
               <Box
-                bg={msg.username === "You" ? "blue.300" : "green.300"}
+                width="100%" // Full width for consistent box sizing
+                maxWidth="80%" // Optional: limit maximum width for better appearance
+                bg={msg.username === "You" ? "blue.500" : "green.300"}
                 color="white"
                 p={3}
-                borderRadius="md"
-                maxWidth="70%"
+                borderRadius="10px"
                 boxShadow="lg"
+                textAlign="center" // Center the text inside the box
               >
-                <Text fontWeight="bold" color={msg.username === "You" ? "white" : "blackAlpha.800"} mb={1}>
-                  {msg.username}
-                </Text>
+                {msg.username !== "You" && (
+                  <Text fontWeight="bold" color="blackAlpha.800" mb={1} textAlign="center">
+                    {msg.username}
+                  </Text>
+                )}
                 <Text>{msg.text}</Text>
               </Box>
             </Flex>

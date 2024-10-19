@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, VStack, Heading, Button, Image } from "@chakra-ui/react";
+import { Box, VStack, Heading, Button, Image, Input, FormControl } from "@chakra-ui/react";
 import { useHistory } from "react-router-dom";
 import { io } from "socket.io-client";
 import backgroundImage from "./Authentication/background.png";  
@@ -11,17 +11,25 @@ const Domain = () => {
   const [locationStatus, setLocationStatus] = useState("Your location is not shared");
   const [locationDetails, setLocationDetails] = useState(null);
   const [address, setAddress] = useState("");
+  const [username, setUsername] = useState(""); // State to hold the username input
 
   useEffect(() => {
     socket.on("connect", () => {
       console.log("Connected to Socket.IO server");
     });
-    // Avoid disconnecting socket during page navigation
+
+    return () => {
+      socket.off("connect"); // Clean up the event listener on component unmount
+    };
   }, []);
 
   const handleJoinGroup = (groupName) => {
-    socket.emit("joinRoom", { roomName: groupName });
-    history.push(`/chat/${groupName}`);
+    if (!username) {
+      alert("Please enter your name before joining a group.");
+      return;
+    }
+    socket.emit("joinRoom", { roomName: groupName, username: username });
+    history.push(`/chat/${groupName}?username=${username}`); // Pass username as a query parameter
   };
 
   const handleShareLocation = () => {
@@ -68,15 +76,15 @@ const Domain = () => {
       display="flex"
       justifyContent="center"
       alignItems="center"
-      minHeight="100vh"
-      padding={4}
+      height="100vh"
+      padding={2}
       backgroundSize="cover"
       backgroundPosition="center"
     >
-      <VStack spacing={8} width="80%">
+      <VStack spacing={4} width="90%" height="95%">
         <Box 
           background="blue.100"
-          padding={6}
+          padding={4}
           borderRadius="md"
           border="1px solid"
           borderColor="blue.900"
@@ -87,16 +95,32 @@ const Domain = () => {
             Select a Group to Join
           </Heading>
         </Box>
+
+        {/* Username Input Section */}
+        <Box display="flex" justifyContent="center" width="100%">
+          <FormControl id="username" isRequired width="40%">
+            <Input
+              placeholder="Enter your name"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              marginBottom={2}
+              background="blue.200"
+              textAlign="center"
+            />
+          </FormControl>
+        </Box>
+
         <Box
           display="flex"
           justifyContent="center"
           alignItems="center"
           flexWrap="wrap"
-          gap={6}
+          gap={4}
           width="100%"
+          height="40%"
         >
           <Box
-            width={{ base: "100%", md: "23%" }}
+            width={{ base: "100%", md: "30%" }}
             borderWidth="1px"
             borderRadius="lg"
             overflow="hidden"
@@ -110,9 +134,9 @@ const Domain = () => {
               alt="Web Development Group"
               objectFit="cover"
               width="100%"
-              height="200px"
+              height="150px"
             />
-            <Box p={4}>
+            <Box p={3} textAlign="center">
               <Button
                 colorScheme="blue"
                 width="100%"
@@ -124,7 +148,7 @@ const Domain = () => {
           </Box>
 
           <Box
-            width={{ base: "100%", md: "23%" }}
+            width={{ base: "100%", md: "30%" }}
             borderWidth="1px"
             borderRadius="lg"
             overflow="hidden"
@@ -138,9 +162,9 @@ const Domain = () => {
               alt="AI/ML Group"
               objectFit="cover"
               width="100%"
-              height="200px"
+              height="150px"
             />
-            <Box p={4}>
+            <Box p={3} textAlign="center">
               <Button
                 colorScheme="teal"
                 width="100%"
@@ -152,7 +176,7 @@ const Domain = () => {
           </Box>
 
           <Box
-            width={{ base: "100%", md: "23%" }}
+            width={{ base: "100%", md: "30%" }}
             borderWidth="1px"
             borderRadius="lg"
             overflow="hidden"
@@ -166,9 +190,9 @@ const Domain = () => {
               alt="DSA Group"
               objectFit="cover"
               width="100%"
-              height="200px"
+              height="150px"
             />
-            <Box p={4}>
+            <Box p={3} textAlign="center">
               <Button
                 colorScheme="purple"
                 width="100%"
@@ -179,21 +203,21 @@ const Domain = () => {
             </Box>
           </Box>
         </Box>
+
         <Box
           display="flex"
           justifyContent="space-between"
           alignItems="center"
           width="100%"
-          padding={4}
+          padding={3}
           background="blue.200"
           borderRadius="lg"
           boxShadow="lg"
-          marginTop={8}
           flexDirection={{ base: "column", md: "row" }}
         >
           <Box
             flex="1"
-            padding={4}
+            padding={2}
             textAlign="center"
           >
             <Heading as="h4" size="md" color="blue.900">
@@ -209,19 +233,19 @@ const Domain = () => {
           </Box>
           <Box
             flex="1"
-            padding={4}
+            padding={2}
             textAlign="center"
           >
             <Heading as="h4" size="md" color="blue.900">
               {locationStatus}
             </Heading>
             {locationDetails && (
-              <Heading as="h5" size="sm" color="blue.700" marginTop={2}>
+              <Heading as="h5" size="sm" color="blue.700" marginTop={1}>
                 {locationDetails}
               </Heading>
             )}
             {address && (
-              <Heading as="h5" size="sm" color="blue.500" marginTop={2}>
+              <Heading as="h5" size="sm" color="blue.500" marginTop={1}>
                 {address}
               </Heading>
             )}

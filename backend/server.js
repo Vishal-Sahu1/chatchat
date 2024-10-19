@@ -3,7 +3,6 @@ const dotenv = require("dotenv");
 const http = require("http");
 const socketIo = require("socket.io");
 const path = require("path");
-const { chats } = require("./data/data");
 const connectDB = require("./config/db");
 const userRoutes = require("./routes/userRoutes");
 const cors = require("cors");
@@ -35,16 +34,24 @@ io.on("connection", (socket) => {
 
   // Handling joining room
   socket.on("joinRoom", ({ roomName, username }) => {
-    const userColor = "#" + Math.floor(Math.random() * 16777215).toString(16); // Random color for the user
-    users[socket.id] = { username, userColor };
-    socket.join(roomName);
-    console.log(`${username} joined room: ${roomName}`);
+    if (!username) {
+      username = `Guest_${socket.id.substring(0, 5)}`; // Assign default username if not provided
+    }
 
-    io.to(roomName).emit("message", {
-      username: "Admin",
-      color: "#000000",
-      text: `${username} has joined the room.`,
-    });
+    // Check if user is already registered
+    if (!users[socket.id]) {
+      const userColor = "#" + Math.floor(Math.random() * 16777215).toString(16); // Random color for the user
+      users[socket.id] = { username, userColor };
+      socket.join(roomName);
+      console.log(`${username} joined room: ${roomName}`);
+
+      // Emit only one join message
+      io.to(roomName).emit("message", {
+        username: "Admin",
+        color: "#000000",
+        text: `${username} has joined the room.`,
+      });
+    }
   });
 
   // Handling sending messages
@@ -93,4 +100,4 @@ if (process.env.NODE_ENV === "production") {
 
 // Start server
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`Server Started on PORT ${PORT}`));
+server.listen(PORT, () => console.log(`Server Started on PORT ${PORT}`));  
