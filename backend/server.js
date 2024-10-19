@@ -13,7 +13,11 @@ connectDB();
 
 const app = express();
 app.use(express.json());
-app.use(cors()); // CORS middleware to allow requests from different origins
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 
 const server = http.createServer(app);
 const io = socketIo(server, {
@@ -81,8 +85,7 @@ if (process.env.NODE_ENV === "production") {
   app.get("*", (req, res) => {
     res.sendFile(path.resolve(__dirname1, "frontend", "build", "index.html"));
   });
-}
- else {
+} else {
   app.get("/", (req, res) => {
     res.send("API is Running");
   });

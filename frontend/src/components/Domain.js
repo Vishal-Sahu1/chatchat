@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, VStack, Heading, Button, Image } from "@chakra-ui/react";
 import { useHistory } from "react-router-dom";
 import { io } from "socket.io-client";
@@ -8,6 +8,9 @@ const socket = io("http://localhost:5000"); // Connect to the Socket.IO server
 
 const Domain = () => {
   const history = useHistory();
+  const [locationStatus, setLocationStatus] = useState("Your location is not shared");
+  const [locationDetails, setLocationDetails] = useState(null);
+  const [address, setAddress] = useState("");
 
   useEffect(() => {
     socket.on("connect", () => {
@@ -19,6 +22,44 @@ const Domain = () => {
   const handleJoinGroup = (groupName) => {
     socket.emit("joinRoom", { roomName: groupName });
     history.push(`/chat/${groupName}`);
+  };
+
+  const handleShareLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          setLocationStatus("Location shared");
+          setLocationDetails(`Latitude: ${latitude}, Longitude: ${longitude}`);
+          
+          // Reverse Geocoding to get address
+          try {
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
+            );
+            const data = await response.json();
+            if (data && data.display_name) {
+              setAddress(data.display_name);
+            } else {
+              setAddress("Unable to retrieve address");
+            }
+          } catch (error) {
+            console.error("Error fetching address:", error);
+            setAddress("Error retrieving address");
+          }
+        },
+        (error) => {
+          setLocationStatus("Unable to retrieve your location");
+          console.error("Error getting location: ", error);
+        }
+      );
+    } else {
+      setLocationStatus("Geolocation is not supported by this browser");
+    }
+  };
+
+  const handleJoinNearbyChat = () => {
+    handleJoinGroup("WebDevelopment"); // This should be updated to dynamically choose a nearby group
   };
 
   return (
@@ -48,13 +89,14 @@ const Domain = () => {
         </Box>
         <Box
           display="flex"
-          justifyContent="space-between"
-          width="100%"
+          justifyContent="center"
+          alignItems="center"
           flexWrap="wrap"
           gap={6}
+          width="100%"
         >
           <Box
-            width={{ base: "100%", md: "30%" }}
+            width={{ base: "100%", md: "23%" }}
             borderWidth="1px"
             borderRadius="lg"
             overflow="hidden"
@@ -82,7 +124,7 @@ const Domain = () => {
           </Box>
 
           <Box
-            width={{ base: "100%", md: "30%" }}
+            width={{ base: "100%", md: "23%" }}
             borderWidth="1px"
             borderRadius="lg"
             overflow="hidden"
@@ -110,7 +152,7 @@ const Domain = () => {
           </Box>
 
           <Box
-            width={{ base: "100%", md: "30%" }}
+            width={{ base: "100%", md: "23%" }}
             borderWidth="1px"
             borderRadius="lg"
             overflow="hidden"
@@ -135,6 +177,63 @@ const Domain = () => {
                 Join DSA Group
               </Button>
             </Box>
+          </Box>
+        </Box>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          width="100%"
+          padding={4}
+          background="blue.200"
+          borderRadius="lg"
+          boxShadow="lg"
+          marginTop={8}
+          flexDirection={{ base: "column", md: "row" }}
+        >
+          <Box
+            flex="1"
+            padding={4}
+            textAlign="center"
+          >
+            <Heading as="h4" size="md" color="blue.900">
+              Share Your Location
+            </Heading>
+            <Button
+              colorScheme="green"
+              marginTop={2}
+              onClick={handleShareLocation}
+            >
+              Share Location
+            </Button>
+          </Box>
+          <Box
+            flex="1"
+            padding={4}
+            textAlign="center"
+          >
+            <Heading as="h4" size="md" color="blue.900">
+              {locationStatus}
+            </Heading>
+            {locationDetails && (
+              <Heading as="h5" size="sm" color="blue.700" marginTop={2}>
+                {locationDetails}
+              </Heading>
+            )}
+            {address && (
+              <Heading as="h5" size="sm" color="blue.500" marginTop={2}>
+                {address}
+              </Heading>
+            )}
+            {locationStatus === "Location shared" && (
+              <Button
+                colorScheme="blue"
+                marginTop={4}
+                onClick={handleJoinNearbyChat}
+              >
+                Join Nearby Group Chat
+              </Button>
+            )}
           </Box>
         </Box>
       </VStack>
